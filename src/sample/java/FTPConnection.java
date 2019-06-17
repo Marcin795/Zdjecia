@@ -163,7 +163,7 @@ public class FTPConnection {
     void dispose() {
         try {
             if(client.isConnected()) {
-                client.logout();
+//                client.logout();
                 client.disconnect();
             }
             System.out.println("Disconnected!");

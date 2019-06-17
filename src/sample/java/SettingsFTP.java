@@ -53,12 +53,12 @@ public class SettingsFTP extends SettingsPage implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         settings.loadSettings();
-        FTPSettings ftpSettings = settings.getFTPSettings();
-        server.setText(ftpSettings.server);
-        port.setText(String.valueOf(ftpSettings.port));
-        user.setText(ftpSettings.user);
-        password.setText(ftpSettings.password);
-        savePassword.setSelected(ftpSettings.savePassword);
+        final FTPSettings[] ftpSettings = {settings.getFTPSettings()};
+        server.setText(ftpSettings[0].server);
+        port.setText(String.valueOf(ftpSettings[0].port));
+        user.setText(ftpSettings[0].user);
+        password.setText(ftpSettings[0].password);
+        savePassword.setSelected(ftpSettings[0].savePassword);
 
         if(ftpConnection.client.isConnected()) {
             getRemoteDirectories();
@@ -66,7 +66,13 @@ public class SettingsFTP extends SettingsPage implements Initializable {
 
         remoteDirectories.getSelectionModel().selectedIndexProperty().addListener(((observable, oldValue, newValue) -> {
             try {
-                ftpConnection.client.changeWorkingDirectory(remoteDirectories.getItems().get((Integer) newValue));
+                if((Integer) newValue == -1) {
+                    ftpConnection.client.changeWorkingDirectory(remoteDirectories.getItems().get(remoteDirectories.getItems().indexOf(settings.getFTPSettings().syncDirectory)));
+                } else {
+                    ftpConnection.client.changeWorkingDirectory(remoteDirectories.getItems().get((Integer) newValue));
+                }
+                ftpSettings[0].setSyncDirectory(ftpConnection.client.printWorkingDirectory() + "/");
+                settings.saveFTPSettings(ftpSettings[0]);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -77,7 +83,7 @@ public class SettingsFTP extends SettingsPage implements Initializable {
         ObservableList<String> directories = getDirectories("/");
         if(directories != null) {
             remoteDirectories.setItems(directories);
-            remoteDirectories.setValue("/");
+            remoteDirectories.setValue(settings.getFTPSettings().syncDirectory);
         }
 
 

@@ -1,6 +1,7 @@
 package sample.java;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,9 +32,11 @@ public class Main extends Application {
     }
 
     public void close() {
+
         FTPConnection.getInstance().dispose();
         System.out.println("Bye!");
         stage.close();
+        Platform.exit();
     }
 
 //    Stage stage;

@@ -8,6 +8,7 @@ public class FTPSettings {
     String user;
     String password;
     boolean savePassword;
+
     String syncDirectory;
 
 
@@ -58,5 +59,9 @@ public class FTPSettings {
         } else {
             return "/";
         }
+    }
+
+    public void setSyncDirectory(String syncDirectory) {
+        this.syncDirectory = syncDirectory;
     }
 }

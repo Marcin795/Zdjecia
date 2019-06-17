@@ -4,6 +4,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TreeCell;
@@ -11,15 +12,21 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.TilePane;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
+
+    private Screen secondaryScreen;
+    private SecondScreen secondScreenController;
 
     @FXML
     TilePane tile;
@@ -42,6 +49,12 @@ public class Controller implements Initializable {
 //        ftpConnection.syncImages();
 
         loadImages();
+
+        try {
+            openSecondScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("initialized!");
     }
@@ -75,7 +88,6 @@ public class Controller implements Initializable {
                 tile.getChildren().addAll(imageView);
             }
         }
-        
     }
 
     private ImageView createImageView(final File imageFile) {
@@ -85,6 +97,14 @@ public class Controller implements Initializable {
             final Image image = new Image(new FileInputStream(imageFile), 250, 0, true, true);
             imageView = new ImageView(image);
             imageView.setFitWidth(250);
+            imageView.setPreserveRatio(true);
+            imageView.setOnMouseClicked(event -> {
+                if(event.getButton().equals(MouseButton.PRIMARY)) {
+                    if(event.getClickCount() == 2) {
+                        System.out.println("double clicked image " + event.getTarget());
+                    }
+                }
+            });
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -109,6 +129,7 @@ public class Controller implements Initializable {
         fileTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if(newValue != null && newValue.isLeaf()) {
                 loadImages(newValue.getValue().getPath());
+                secondScreenController.refresh(newValue.getValue().getPath());
             }
         });
 
@@ -138,17 +159,34 @@ public class Controller implements Initializable {
 
     }
 
-    public synchronized void openFTPConnection() {
-        Runnable r = () -> ftpConnection.connect();
-        while (!ftpConnection.connected) {
-            try {
-                ftpConnection.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    public void openSecondScreen() throws IOException {
+
+        Screen primaryScreen = Screen.getPrimary();
+
+        Screen.getScreens().stream()
+                .filter(s->!s.equals(primaryScreen))
+                .findFirst().ifPresent(s->secondaryScreen = s);
+
+        if(secondaryScreen != null) {
+            Stage secondScreenWindow = new Stage();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/secondScreen.fxml"));
+            Parent root = loader.load();
+
+            secondScreenController = loader.getController();
+
+            secondScreenWindow.setScene(new Scene(root));
+            Rectangle2D bounds = secondaryScreen.getBounds();
+
+            secondScreenWindow.setX(bounds.getMinX());
+            secondScreenWindow.setY(bounds.getMinY());
+            secondScreenWindow.setWidth(bounds.getWidth());
+            secondScreenWindow.setHeight(bounds.getHeight());
+
+            secondScreenWindow.initStyle(StageStyle.UNDECORATED);
+            secondScreenWindow.show();
         }
-        System.out.println("should be connected?");
     }
+
 
     public void openMostRecent() {
         if(fileTree.getRoot().getChildren().isEmpty()) {
