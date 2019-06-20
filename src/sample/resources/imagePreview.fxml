@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.TilePane?>
+
+<ScrollPane fx:id="scroll" fitToWidth="true" hbarPolicy="NEVER" prefHeight="564.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.java.ImagePreview">
+   <content>
+       <TilePane fx:id="tile" alignment="TOP_CENTER" hgap="15.0" vgap="15.0" />
+   </content>
+   <padding>
+       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</ScrollPane>
