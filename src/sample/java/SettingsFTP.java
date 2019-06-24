@@ -53,12 +53,12 @@ public class SettingsFTP extends SettingsPage implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         settings.loadSettings();
-        final FTPSettings[] ftpSettings = {settings.getFTPSettings()};
-        server.setText(ftpSettings[0].server);
-        port.setText(String.valueOf(ftpSettings[0].port));
-        user.setText(ftpSettings[0].user);
-        password.setText(ftpSettings[0].password);
-        savePassword.setSelected(ftpSettings[0].savePassword);
+        FTPSettings ftpSettings = settings.getFTPSettings();
+        server.setText(ftpSettings.server);
+        port.setText(String.valueOf(ftpSettings.port));
+        user.setText(ftpSettings.user);
+        password.setText(ftpSettings.password);
+        savePassword.setSelected(ftpSettings.savePassword);
 
         if(ftpConnection.client.isConnected()) {
             getRemoteDirectories();
@@ -71,10 +71,11 @@ public class SettingsFTP extends SettingsPage implements Initializable {
                 } else {
                     ftpConnection.client.changeWorkingDirectory(remoteDirectories.getItems().get((Integer) newValue));
                 }
-                ftpSettings[0].setSyncDirectory(ftpConnection.client.printWorkingDirectory() + "/");
-                settings.saveFTPSettings(ftpSettings[0]);
+                FTPSettings updatedFtpSettings = settings.getFTPSettings();
+                updatedFtpSettings.setSyncDirectory(ftpConnection.client.printWorkingDirectory() + "/");
+                settings.saveFTPSettings(updatedFtpSettings);
             } catch (IOException e) {
-                e.printStackTrace();
+                ExceptionLogger.log(e);
             }
         }));
     }
@@ -105,7 +106,7 @@ public class SettingsFTP extends SettingsPage implements Initializable {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionLogger.log(e);
         }
         return list;
     }

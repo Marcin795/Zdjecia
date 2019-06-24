@@ -1,0 +1,9 @@
+/*Overrides the default and removes the 10px padding from the left most tab */
+.tab-pane:top *.tab-header-area {
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0.416667em 0.166667em 0.0em 0.0em; /* overridden as 5 2 0 0 */
+}
+
+.tab-header-background {
+    -fx-background-color: transparent;
+}

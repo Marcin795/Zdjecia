@@ -5,12 +5,12 @@
 
 <BorderPane fx:id="settingsWindow" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.java.SettingsWindow">
    <left>
-      <TreeView fx:id="settingsTree" prefHeight="200.0" prefWidth="200.0" showRoot="false" BorderPane.alignment="CENTER" />
+      <TreeView fx:id="settingsTree" prefHeight="400.0" prefWidth="110.0" showRoot="false" BorderPane.alignment="CENTER" />
    </left>
    <center>
       <BorderPane fx:id="mainView">
          <center>
-            <fx:include source="settingsFTP.fxml" />
+<!--            <fx:include source="settingsFTP.fxml" />-->
          </center>
       </BorderPane>
    </center>

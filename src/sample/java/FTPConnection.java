@@ -1,14 +1,12 @@
 package sample.java;
 
-//import com.google.gson.Gson;
-//import com.google.gson.stream.JsonReader;
-import javafx.collections.ObservableList;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
 import java.net.ConnectException;
+import java.net.SocketException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,9 +16,7 @@ public class FTPConnection {
 
     private static FTPConnection instance = new FTPConnection();
 
-//    private FTPClient client;
     public FTPClient client;
-    boolean connected;
     private DateFormat dateFormat;
 
     private String server;
@@ -51,9 +47,7 @@ public class FTPConnection {
     }
 
     private FTPConnection() {
-//        System.out.println("Constructing FTPConnection");
         client = new FTPClient();
-        connected = false;
         dateFormat = new SimpleDateFormat("yyyy-MM-dd/HH");
         server = "localhost";
         port = 21;
@@ -66,40 +60,33 @@ public class FTPConnection {
         this.port = ftpSettings.getPort();
         this.user = ftpSettings.getUser();
         this.password = ftpSettings.getPassword();
-//        Settings.getInstance().saveFTPSettings();
         System.out.println("Set stuff!");
     }
 
     synchronized void connect() {
-//        System.out.println("Connecting...");
 //        new Thread( () -> {
         try {
             dispose();
             client.connect(server, port);
             System.out.println("client.connect: " + client.getReplyCode());
-            if(client.getReplyCode() == 220) {
-//                System.out.println("Logging in...");
+            if (client.getReplyCode() == 220) {
                 client.login(user, password);
                 System.out.println("client.login: " + Arrays.toString(client.getReplyStrings()));
-            } else throw new ConnectException();
-            if(client.getReplyCode() == 230) {
-            } else throw new ConnectException();
+                if (client.getReplyCode() != 230) throw new ConnectException("Can't login.");
+            } else throw new ConnectException("Can't connect.");
             client.enterLocalPassiveMode();
             client.setFileType(FTP.BINARY_FILE_TYPE);
-            connected = true;
-//            System.out.println("Connected!");
-        } catch(Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println("Couldn't connect.");
+            ExceptionLogger.log(e);
             dispose();
-            System.out.println("Can't connect.");
         }
 //        }).start();
         notifyAll();
     }
 
     public void syncImages() {
-//        System.out.println("Syncing.. " + connected);
-        if(!connected) {
+        if(!client.isConnected()) {
             System.out.println("Not connected!");
             return;
         }
@@ -111,8 +98,10 @@ public class FTPConnection {
                     continue;
                 }
                 String savePath = prefix + "/" + dateFormat.format(file.getTimestamp().getTime()) + "/" + file.getName();
+
+//                System.out.println(savePath);
                 File downloadFile = new File(savePath);
-                //noinspection ResultOfMethodCallIgnored
+//                noinspection ResultOfMethodCallIgnored
                 downloadFile.getParentFile().mkdirs();
                 OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(downloadFile));
                 boolean success = client.retrieveFile(file.getName(), outputStream);
@@ -123,7 +112,8 @@ public class FTPConnection {
             }
 //            System.out.println("Synced!");
         } catch(IOException e) {
-            e.printStackTrace();
+            System.out.println("henlo");
+            ExceptionLogger.log(e);
         }
     }
 
@@ -154,7 +144,7 @@ public class FTPConnection {
             }
             client.changeWorkingDirectory(path);
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionLogger.log(e);
         }
 
         return directories;
@@ -163,12 +153,11 @@ public class FTPConnection {
     void dispose() {
         try {
             if(client.isConnected()) {
-//                client.logout();
                 client.disconnect();
+                System.out.println("Disconnected!");
             }
-            System.out.println("Disconnected!");
-        } catch(IOException ex) {
-            ex.printStackTrace();
+        } catch(IOException e) {
+            ExceptionLogger.log(e);
         }
     }
 }

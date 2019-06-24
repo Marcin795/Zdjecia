@@ -33,7 +33,6 @@ public class SettingsPage {
     }
 
     public void setSettingsController(SettingsWindow settingsWindow) {
-        System.out.println("ssc");
         this.settingsWindow = settingsWindow;
     }
 }

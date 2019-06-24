@@ -3,10 +3,12 @@ package sample.java;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -21,23 +23,27 @@ public class SettingsWindow implements Initializable {
     @FXML
     BorderPane settingsWindow;
 
+    Stage stage;
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
     private ArrayList<SettingsPage> settings;
-    private Controller mainWindow;
+    private MainWindowController mainWindow;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         settings = new ArrayList<>();
-        settings.add(new SettingsPage("FTP"));
-        settings.add(new SettingsPage("Cos", "cos innego"));
+        settings.add(new SettingsFTP());
+        settings.add(new SettingsPrinter());
 
         settingsTree.refresh();
         TreeItem<SettingsPage> root = new TreeItem<>(new SettingsPage("Settings"));
 
         for(SettingsPage setting : settings) {
-            TreeItem<SettingsPage> next = new TreeItem<>(setting);
-
-            root.getChildren().addAll(new TreeItem<>(setting));
+            root.getChildren().add(new TreeItem<>(setting));
         }
         settingsTree.setRoot(root);
 
@@ -58,20 +64,15 @@ public class SettingsWindow implements Initializable {
                 if(newValue != null && newValue.isLeaf()) {
                     String pageID = newValue.getValue().getName();
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/settings" + pageID + ".fxml"));
-    //                loader.setMainController(getClass().getResource("sample.java.Settings" + pageID));
-    //                loader.getController();
-    //                System.out.println(this);
-                    //                System.out.println(settingsFTP);
-                    //                settingsFTP.setSettingsController(this);
-
                     settingsWindow.setCenter(loader.load());
                     SettingsPage sp = loader.getController();
+                    if(sp.getClass() == SettingsPrinter.class) {
+                        ((SettingsPrinter) sp).setStage(stage);
+                    }
                     sp.setSettingsController(this);
-                    System.out.println(sp);
-
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                ExceptionLogger.log(e);
             }
         });
 
@@ -79,7 +80,7 @@ public class SettingsWindow implements Initializable {
 
     }
 
-    public void setMainController(Controller controller) {
+    public void setMainController(MainWindowController controller) {
         this.mainWindow = controller;
     }
 
